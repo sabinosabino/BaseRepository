@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>DapperRepository</Title>
+    <Authors>$(AssemblyName),sabino</Authors>
+    <Description>DapperRepository is used to facilitate CRUD using the dapper model.
+
+Abstraction facilitates the creation of repository models</Description>
+    <PackageId>BaseRespoitory</PackageId>
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
+  </ItemGroup>
+
+</Project>
