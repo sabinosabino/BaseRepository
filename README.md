@@ -2,7 +2,7 @@
 
 Uma implementação leve de repositório base utilizando **Dapper** para simplificar operações CRUD em aplicações .NET.
 
-https://www.nuget.org/packages/Sabino.BaseRespository
+https://www.nuget.org/packages/Sabino.BaseRepository
 
 ## ✨ Recursos
 
