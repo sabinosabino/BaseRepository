@@ -1,8 +1,8 @@
-# BaseRepository
+# Sabino.BaseRepository
 
 Uma implementação leve de repositório base utilizando **Dapper** para simplificar operações CRUD em aplicações .NET.
 
-[![NuGet](https://www.nuget.org/packages/BaseRepository/)]
+[![NuGet](https://www.nuget.org/packages/Sabino.BaseRepository/)]
 
 ## ✨ Recursos
 
@@ -18,7 +18,7 @@ Uma implementação leve de repositório base utilizando **Dapper** para simplif
 Você pode instalar via **NuGet Package Manager**:
 
 ```bash
-Install-Package BaseRepository
+Install-Package Sabino.BaseRepository
 ```
 
 ---
