@@ -1,7 +1,7 @@
 ﻿
 using System.Data;
 
-namespace BaseRepository
+namespace Sabino.BaseRepository
 {
     public class RepositoryBase<T>
     {
@@ -10,7 +10,7 @@ namespace BaseRepository
         {
             _db = db;
         }
-        private RepositoryBase(IDbConnection conn)
+        public RepositoryBase(IDbConnection conn)
         {
             _db= new DbContext(conn);
         }

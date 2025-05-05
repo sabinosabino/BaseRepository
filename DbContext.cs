@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using Dapper;
 
-namespace BaseRepository
+namespace Sabino.BaseRepository
 {
     public class DbContext
     {
