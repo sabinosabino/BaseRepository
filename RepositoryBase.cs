@@ -1,4 +1,6 @@
 ﻿
+using System.Data;
+
 namespace BaseRepository
 {
     public class RepositoryBase<T>
@@ -7,6 +9,10 @@ namespace BaseRepository
         public RepositoryBase(DbContext db)
         {
             _db = db;
+        }
+        private RepositoryBase(IDbConnection conn)
+        {
+            _db= new DbContext(conn);
         }
         public async Task<IEnumerable<T>> GetAll()
         {
