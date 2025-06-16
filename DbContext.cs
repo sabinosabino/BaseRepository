@@ -92,8 +92,18 @@ namespace Sabino.BaseRepository
         {
             ValidarObjeto(entity);
             string sql = GenSqlInsert<T>(ignore);
+
             return await _connection.ExecuteAsync(sql, entity);
         }
+
+        public async Task<int> InsertAsync<T>(IEnumerable<T> entitys, string ignore = "Id")
+        {
+            string sql = GenSqlInsert<T>(ignore);
+            var list = entitys.ToArray();
+            return await _connection.ExecuteAsync(sql, list);
+        }
+
+
         public async Task<T> GetLastInsertedAsync<T>(string idColumn = "Id")
         {
             string sql = $@"

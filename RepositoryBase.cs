@@ -70,6 +70,11 @@ namespace Sabino.BaseRepository
         {
             return await _db.InsertAsync<T>(model, ignore);
         }
+        public async Task<int> Insert(IEnumerable<T> model, string ignore = "Id")
+        {
+            return await _db.InsertAsync<T>(model, ignore);
+        }
+
         public async Task<int> Update(T model, string ignore = "Id")
         {
             return await _db.UpdateAsync<T>(model, ignore);
