@@ -9,6 +9,11 @@ namespace BaseRepository
 {
     public static class DbContext
     {
+        public static async Task<T> GetOne<T>(this IDbConnection connection, object param)
+        {
+            string sql = $"SELECT * FROM {GetTableName<T>()} WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<T>(sql, param);
+        }
         
         public static async Task<IEnumerable<T>> Get<T>(this IDbConnection connection, object param)
         {
