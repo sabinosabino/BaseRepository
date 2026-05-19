@@ -7,7 +7,7 @@ using Dapper;
 
 namespace Sabino.BaseRepository
 {
-    public class DbContext
+    public class DbContext : IDisposable
     {
         IDbConnection _connection;
         public DbContext(IDbConnection connection)
@@ -103,6 +103,12 @@ namespace Sabino.BaseRepository
             return await _connection.ExecuteAsync(sql, list);
         }
 
+        public async Task<int> InsertAsync<T>(IEnumerable<T> entitys, string ignore = "Id",int batchSize=1000)
+        {
+            string sql = GenSqlInsert<T>(entitys, ignoreColumn: ignore, batchSize:batchSize);
+            return await _connection.ExecuteAsync(sql);
+        }
+
 
         public async Task<T> GetLastInsertedAsync<T>(string idColumn = "Id")
         {
@@ -125,7 +131,7 @@ namespace Sabino.BaseRepository
             string sql = $"DELETE FROM {GetTableName<T>()} WHERE Id = @Id";
             return await _connection.ExecuteAsync(sql, param);
         }
-        private string GetTableName<T>()
+        private static string GetTableName<T>()
         {
             var atr = typeof(T).GetCustomAttribute<TableAttribute>();
             return atr == null ? typeof(T).Name : atr.Name;
@@ -154,6 +160,71 @@ namespace Sabino.BaseRepository
             var finalColumns = string.Join(",", validColumns.Where(c => !ignoreColumns.Contains(c)));
 
             return $"INSERT INTO {tableName} ({finalColumns}) VALUES ({string.Join(",", finalColumns.Split(',').Select(c => $"@{c}"))})";
+        }
+
+        public string GenSqlInsert<T>(IEnumerable<T> items, int batchSize = 1000, string ignoreColumn = "Id")
+        {
+            if (items == null || !items.Any())
+                throw new ArgumentException("The items collection cannot be null or empty.");
+
+            // Get table name from the first item
+            var tableName = GetTableName<T>();
+
+            // Get properties excluding NotMapped and ignored columns
+            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanRead && 
+                           !p.Name.Equals(ignoreColumn, StringComparison.OrdinalIgnoreCase) &&
+                           !p.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.Schema.NotMappedAttribute), true).Any())
+                .ToList();
+
+            if (!properties.Any())
+                throw new InvalidOperationException($"No valid public properties found in type {typeof(T).Name}");
+
+            var batches = items.Chunk(batchSize);
+            var sqlBuilder = new StringBuilder();
+
+            foreach (var batch in batches)
+            {
+                var columns = string.Join(", ", properties.Select(p => $"{p.Name}"));
+                var values = new List<string>();
+
+                foreach (var item in batch)
+                {
+                    var itemValues = properties.Select(p =>
+                    {
+                        var value = p.GetValue(item);
+                        if (value == null)
+                            return "NULL";
+
+                        if (value is string)
+                            return $"'{value.ToString().Replace("'", "\\'")}'";
+
+                        if (value is DateTime dateTime)
+                            return $"'{dateTime:yyyy-MM-dd HH:mm:ss}'";
+
+                        if (value is Guid guid)
+                            return $"'{guid}'";
+
+                        if (value is bool)
+                            return (bool)value ? "1" : "0";
+
+                        if (value is decimal || value is double || value is float)
+                            return value.ToString().Replace(",", ".");
+
+                        return value.ToString();
+                    });
+
+                    values.Add($"({string.Join(", ", itemValues)})");
+                }
+
+                sqlBuilder.AppendLine($"INSERT INTO {tableName} ({columns})");
+                sqlBuilder.AppendLine("VALUES");
+                sqlBuilder.AppendLine(string.Join(",\n", values));
+                sqlBuilder.AppendLine(";");
+                sqlBuilder.AppendLine();
+            }
+
+            return sqlBuilder.ToString();
         }
         private string GenSqlUpdate<T>(string ignore = "")
         {
@@ -253,5 +324,17 @@ namespace Sabino.BaseRepository
             }
         }
 
+        public void Dispose()
+        {
+            try
+            {
+                _connection.Close();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+        }
     }
 }

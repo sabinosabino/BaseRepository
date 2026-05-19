@@ -74,7 +74,10 @@ namespace Sabino.BaseRepository
         {
             return await _db.InsertAsync<T>(model, ignore);
         }
-
+        public async Task<int> InsertBulk(IEnumerable<T> entitys, string ignore = "Id", int batchSize = 1000)
+        {
+            return await _db.InsertAsync<T>(entitys, ignore, batchSize);
+        }
         public async Task<int> Update(T model, string ignore = "Id")
         {
             return await _db.UpdateAsync<T>(model, ignore);
